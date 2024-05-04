@@ -38,6 +38,59 @@ COPY --chown=www-data:www-data . /var/www/html
 # Install Composer dependencies
 RUN composer install --no-interaction --no-plugins --no-scripts --prefer-dist
 
+ENV \
+    # Application settings
+    APP_NAME=Laravel \
+    APP_ENV=local \
+    APP_KEY= \
+    APP_DEBUG=true \
+    APP_TIMEZONE=UTC \
+    APP_URL=http://localhost \
+    APP_LOCALE=en \
+    APP_FALLBACK_LOCALE=en \
+    APP_FAKER_LOCALE=en_US \
+    APP_MAINTENANCE_DRIVER=file \
+    APP_MAINTENANCE_STORE=database \
+    BCRYPT_ROUNDS=12 \
+    # Logging
+    LOG_CHANNEL=stack \
+    LOG_STACK=single \
+    LOG_DEPRECATIONS_CHANNEL=null \
+    LOG_LEVEL=debug \
+    # Database
+    DB_CONNECTION=sqlite \
+    # Session
+    SESSION_DRIVER=database \
+    SESSION_LIFETIME=120 \
+    SESSION_ENCRYPT=false \
+    SESSION_PATH=/ \
+    SESSION_DOMAIN=null \
+    # Cache
+    CACHE_STORE=database \
+    CACHE_PREFIX= \
+    # Redis
+    REDIS_CLIENT=phpredis \
+    REDIS_HOST=127.0.0.1 \
+    REDIS_PASSWORD=null \
+    REDIS_PORT=6379 \
+    # Mail
+    MAIL_MAILER=log \
+    MAIL_HOST=127.0.0.1 \
+    MAIL_PORT=2525 \
+    MAIL_USERNAME=null \
+    MAIL_PASSWORD=null \
+    MAIL_ENCRYPTION=null \
+    MAIL_FROM_ADDRESS="hello@example.com" \
+    MAIL_FROM_NAME="${APP_NAME}" \
+    # AWS
+    AWS_ACCESS_KEY_ID= \
+    AWS_SECRET_ACCESS_KEY= \
+    AWS_DEFAULT_REGION=us-east-1 \
+    AWS_BUCKET= \
+    AWS_USE_PATH_STYLE_ENDPOINT=false \
+    # Vite
+    VITE_APP_NAME="${APP_NAME}"
+    
 # Expose port 80
 EXPOSE 80
 

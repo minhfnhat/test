@@ -38,6 +38,14 @@ COPY --chown=www-data:www-data . /var/www/html
 # Install Composer dependencies
 RUN composer install --no-interaction --no-plugins --no-scripts --prefer-dist
 
+# Generate Laravel application key
+RUN php artisan key:generate
+
+# Run database migrations
+RUN php artisan migrate --force
+
+
+# Add env
 ENV \
     # Application settings
     APP_NAME=Laravel \

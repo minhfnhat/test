@@ -100,7 +100,6 @@ ENV \
     VITE_APP_NAME="${APP_NAME}"
     
 # Expose port 80
-EXPOSE 80
+CMD php artisan serve --host=0.0.0.0 --port=8181
 
-# Start Apache server
-CMD ["apache2-foreground"]
+EXPOSE 8081

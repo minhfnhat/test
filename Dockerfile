@@ -36,11 +36,8 @@ COPY --chown=www-data:www-data . /var/www/html
 RUN composer install --no-interaction --no-plugins --no-scripts --prefer-dist
 
 # Set permissions for the storage directory and .env file
-RUN chmod -R 777 storage bootstrap/cache
-RUN chown -R www-data:www-data storage
-
 # Generate Laravel application key
-RUN php artisan key:generate
+RUN php artisan key:generate --ansi 
 
 # Run database migrations
 RUN php artisan migrate --force

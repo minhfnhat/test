@@ -1,105 +1,56 @@
-# Use an official PHP runtime as a parent image with Apache and PHP 8.2
-FROM php:8.2-apache
+# Use the official Ubuntu 20.04 base image
+FROM ubuntu:20.04
 
-# Set working directory
-WORKDIR /var/www/html
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    git \
-    curl
+# Update package list and install necessary packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libpq-dev \
+    libmysqlclient-dev \
+    wget \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install TensorFlow, PyTorch, Keras, scikit-learn, NLTK
+RUN pip3 install --no-cache-dir \
+    tensorflow \
+    torch torchvision torchaudio \
+    keras \
+    scikit-learn \
+    nltk
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Install OpenCV
+RUN pip3 install --no-cache-dir opencv-python
 
-# Get latest Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Install PostgreSQL
+RUN apt-get update && \
+    apt-get install -y postgresql postgresql-contrib && \
+    rm -rf /var/lib/apt/lists/*
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Install MongoDB
+RUN apt-get update && \
+    apt-get install -y mongodb && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy Apache configuration file with DirectoryIndex directive
-COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
+# Install MySQL
+RUN apt-get update && \
+    apt-get install -y mysql-server && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy existing application directory contents
-COPY . /var/www/html
+# Expose the ports for PostgreSQL, MongoDB, and MySQL
+EXPOSE 5432 27017 3306
 
-# Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www/html
-
-# Install Composer dependencies
-RUN composer install --no-interaction --no-plugins --no-scripts --prefer-dist
-
-# Generate Laravel application key
-RUN php artisan key:generate --ansi
-
-# Run database migrations
-RUN php artisan migrate --force
-
-
-# Add env
-ENV \
-    # Application settings
-    APP_NAME=Laravel \
-    APP_ENV=local \
-    APP_KEY= \
-    APP_DEBUG=true \
-    APP_TIMEZONE=UTC \
-    APP_URL=http://localhost \
-    APP_LOCALE=en \
-    APP_FALLBACK_LOCALE=en \
-    APP_FAKER_LOCALE=en_US \
-    APP_MAINTENANCE_DRIVER=file \
-    APP_MAINTENANCE_STORE=database \
-    BCRYPT_ROUNDS=12 \
-    # Logging
-    LOG_CHANNEL=stack \
-    LOG_STACK=single \
-    LOG_DEPRECATIONS_CHANNEL=null \
-    LOG_LEVEL=debug \
-    # Database
-    DB_CONNECTION=sqlite \
-    # Session
-    SESSION_DRIVER=database \
-    SESSION_LIFETIME=120 \
-    SESSION_ENCRYPT=false \
-    SESSION_PATH=/ \
-    SESSION_DOMAIN=null \
-    # Cache
-    CACHE_STORE=database \
-    CACHE_PREFIX= \
-    # Redis
-    REDIS_CLIENT=phpredis \
-    REDIS_HOST=127.0.0.1 \
-    REDIS_PASSWORD=null \
-    REDIS_PORT=6379 \
-    # Mail
-    MAIL_MAILER=log \
-    MAIL_HOST=127.0.0.1 \
-    MAIL_PORT=2525 \
-    MAIL_USERNAME=null \
-    MAIL_PASSWORD=null \
-    MAIL_ENCRYPTION=null \
-    MAIL_FROM_ADDRESS="hello@example.com" \
-    MAIL_FROM_NAME="${APP_NAME}" \
-    # AWS
-    AWS_ACCESS_KEY_ID= \
-    AWS_SECRET_ACCESS_KEY= \
-    AWS_DEFAULT_REGION=us-east-1 \
-    AWS_BUCKET= \
-    AWS_USE_PATH_STYLE_ENDPOINT=false \
-    # Vite
-    VITE_APP_NAME="${APP_NAME}"
-    
-# Expose port 80
-CMD php artisan serve --host=0.0.0.0 --port=8181
-
-EXPOSE 8181
+# Start services
+CMD service postgresql start && \
+    service mongodb start && \
+    service mysql start && \
+    bash
